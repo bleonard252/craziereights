@@ -8,10 +8,35 @@
 </head>
 <body>
     <!-- HOST MODE -->
-    
+    <main type="host-start" class="d-none">
+        <div class="container">
+            <div class="row">
+                <div class="col-md"></div>
+                <div class="col-md-6 mt-3">
+                    <div class="form-group">
+                        <label for="deck-choice">Deck</label>
+                        <select class="custom-select" id="deck-choice">
+                            <option value="uno">Standard deck</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="homeserver-choice">Homeserver (the default should suffice)</label>
+                        <input type="url" class="form-control" id="homeserver-choice" placeholder="matrix.org" value="matrix.org">
+                    </div>
+                    <div id="host-start-button-container" class="float-right">
+                        <!-- <button type="button" class="btn btn-light">Join</button> -->
+                        <button type="button" class="btn btn-primary" onclick="cz8.host.start_playerlist()">Continue</button>
+                    </div>
+                </div>
+                <div class="col-md"></div>
+            </div>
+        </div>
+    </main>
 
     <script src="/js/jquery.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/matrix.js"></script>
+    <script src="/js/uri.js"></script>
+    <script src="/js/craziereights.js"></script>
 </body>
 </html>

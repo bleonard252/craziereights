@@ -25,10 +25,65 @@
                     </div>
                     <div id="host-start-button-container" class="float-right">
                         <!-- <button type="button" class="btn btn-light">Join</button> -->
-                        <button type="button" class="btn btn-primary" onclick="cz8.host.start_playerlist()">Continue</button>
+                        <button type="button" class="btn btn-primary" onclick="cz8.page('host-login')">Continue</button>
                     </div>
                 </div>
                 <div class="col-md"></div>
+            </div>
+        </div>
+    </main>
+    <main type="host-list" class="d-none">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 p-5" col=left>Game Log</div>
+                <div class="col-md-6 p-5" col=right>
+                    <div class="alert alert-success" role="alert">
+                        Now all that's left to do is get your friends in here and get started!
+                        <p id="host-address-share">Share the following address: <span>https://example.com/invalid-url?room=!Gexw5EV:example.org</span></p>
+                    </div>
+                    <ul class="list-group cz8-host-list-playerlist cz8-playerlist">
+                        <li class="list-group-item active">Player List</li>
+                        <!-- <li class="list-group-item cz8-listedplayer" data-player-id="@0123456789:example.org">0123456789</li> -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+    <main type="host-login" class="d-none">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3"></div>
+                <div class="col-md-6 p-5">
+                    <div class="form-group">
+                        <label for="host-login-username">Username</label>
+                        <input type="username" class="form-control" id="host-login-username">
+                    </div>
+                    <div class="form-group">
+                        <label for="host-login-password">Password</label>
+                        <input type="password" class="form-control" id="host-login-password">
+                    </div>
+                    To register, go to <a href="https://riot.im">Riot.im</a> and register there.
+                    <div id="host-login-button-container" class="float-right">
+                        <!-- <button class="btn btn-light" onclick="cz8.host.register()">Register</button> or  -->
+                        <button class="btn btn-primary" onclick="cz8.host.login()">Login to Matrix</button>
+                    </div>
+                </div>
+                <div class="col-md-3"></div>
+            </div>
+        </div>
+    </main>
+    <main type="game-screen" class="d-none">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 p-5" col=left>
+                    Your Cards <!--TODO: add cards-->
+                </div>
+                <div class="col-md-6 p-5" col=right>
+                    <ul class="list-group cz8-playerlist">
+                        <li class="list-group-item active">Player List</li>
+                        <!-- <li class="list-group-item cz8-listedplayer" data-player-id="@0123456789:example.org">0123456789</li> -->
+                    </ul>
+                </div>
             </div>
         </div>
     </main>

@@ -37,13 +37,54 @@ cz8.parseCard = function parseCard(card) {
 };
 
 cz8.host = {};
-/** Called when the dealer presses the Continue button. */
-cz8.host.start_playerlist = function start_playerlist() {
-    $()
+/** Called when the dealer succeeds with login. */
+cz8.host.start_playerlist = async function start_playerlist() {
+    cz8.page("host-list");
+    var room = await window.cz8local.client.createRoom({
+        room_alias_name: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15), // a long random string. it's a temporary room but to have guest access it needs this
+        visibility: 'private',
+        creation_content: { "m.room.join_rules": {join_rule: "public"} },
+        initial_state: [
+            {
+                type: "xyz.blogold.crazier",
+                content: {game: true} // Sets the state to show this is a Crazier Eights game room.
+            }
+        ]
+    });
+    // compose the room ID
+    $("#host-address-share span").html(location.origin + location.pathname + "?room=" + encodeURIComponent(room.room_id));
+    
+    // player list
+    window.cz8local.knownplayers = []
+    const memberLeaveStates = ["kick", "ban", "leave"];
+    const memberJoinStates = ["join"];
+    window.cz8local.client.on('RoomMember.membership', (event, member, oldmembership) => {
+        if (memberLeaveStates.has(member.membership)) {
+            if (window.cz8local.knownplayers.has(member.userId)) 
+                window.cz8local.knownplayers.splice(window.cz8local.knownplayers.indexOf(member.userId),1);
+            let x = $(".cz8-playerlist [data-player-id="+member.userId+"].cz8-listedplayer") || null;
+            if (x && x !== $()) x.remove()
+        }
+        if (memberJoinStates.has(member.membership)) {
+            if (!window.cz8local.knownplayers.has(member.userId)) window.cz8local.knownplayers.push(member.userId)
+            $(".cz8-playerlist").append(`<li class="list-group-item cz8-listedplayer" data-player-id="${member.user-id}">${member.name}</li>`)
+        }
+    })
+    window.cz8local.client.on('RoomMember.name', (event, member, oldname) => {
+        let x = $(".cz8-playerlist [data-player-id="+member.userId+"].cz8-listedplayer") || null;
+        if (x && x !== $()) x.html(member.name)
+    })
 };
+cz8.host.login = async function login() {
+    window.cz8local.homeserver = $("#homeserver-choice").val();
+    window.cz8local.client = matrixcs.createClient("https://" + window.cz8local.homeserver || "matrix.org");
+    window.cz8local.user = await window.cz8local.client.loginWithPassword($("#host-login-username").val(), $("#host-login-password").val());
+    window.cz8local.client = matrixcs.createClient({baseUrl:"https://" + window.cz8local.homeserver || "matrix.org", accessToken: window.cz8local.user.access_token});
+    cz8.host.start_playerlist();
+}
 
 /** Changes the page.
- * @param {"host-start"} to The page to switch to.
+ * @param {"host-start"|"host-list"} to The page to switch to.
  */
 cz8.page = function page(to) {
     $("main:not(.d-none)").addClass('d-none');
@@ -51,19 +92,27 @@ cz8.page = function page(to) {
 }
 
 $(document).ready(() => {
-    if (!window.URLSearchParams) { $("[type='host-start'] .mt-3").append(`<div class="alert alert-danger" style="margin-top: 72px;" role="alert">ERROR: You're not running a new enough browser. Crazier Eights is developed against modern browsers. Older versions of these browsers, and Internet Explorer, are not supported. To make this message disappear, and to make links work, you'll need to use a browser like Firefox. You will have to use the Join button and trim your link to join a game.</div>`); 
+    /*if (!window.URLSearchParams) { $("[type='host-start'] .mt-3").append(`<div class="alert alert-danger" style="margin-top: 72px;" role="alert">ERROR: You're not running a new enough browser. Crazier Eights is developed against modern browsers. Older versions of these browsers, and Internet Explorer, are not supported. To make this message disappear, and to make links work, you'll need to use a browser like Firefox. You will have to use the Join button and trim your link to join a game.</div>`); 
         var url = {} }
-    else var url = new URLSearchParams(location.search);
+    else var url = new URLSearchParams(location.search);*/
+    var url = {}
+    location.search.substr(1).split("&").map((v, k) => {
+        let i = v.split("=",2);
+        url[i[0]] = i[1];
+    });
     window.cz8local = {url};
     if (url['room']) {
         window.cz8local.room = url['room']
         window.cz8local.homeserver = window.cz8local.room.replace(/^.*\:/,""); //get the homeserver, needed to initialize the SDK
-        window.cz8local.client = matrixcs.createClient(window.cz8local.homeserver || "https://matrix.org"); //this will be re-initialized later (if you're the dealer), maybe?
-        window.cz8local.client.registerGuest()
+        window.cz8local.client = matrixcs.createClient("https://" + window.cz8local.homeserver || "https://matrix.org"); //this will be re-initialized later (if you're the dealer), maybe?
+        if (!localStorage.getItem("crazier-user")) window.cz8local.client.registerGuest() // Guests are usable for playing, but not hosting.
             .then((user) => {
                 window.cz8local.user = user;
+                localStorage.setItem("crazier-user", JSON.stringify(user));
                 console.log(user);
             })
+        else //there is a user. use the user
+            window.cz8local.user = JSON.parse(localStorage.getItem("crazier-user"));
         //TODO: switch pages
     } else {
         cz8.page("host-start");

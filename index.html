@@ -25,7 +25,7 @@
                     </div>
                     <div id="host-start-button-container" class="float-right">
                         <!-- <button type="button" class="btn btn-light">Join</button> -->
-                        <button type="button" class="btn btn-primary" onclick="cz8.page('host-login')">Continue</button>
+                        <button type="button" class="btn btn-primary" onclick="if (localStorage.getItem('crazier-user')) {window.cz8local.user = JSON.parse(localStorage.getItem('crazier-user')); cz8.host.start_playerlist()} else cz8.page('host-login')">Continue</button>
                     </div>
                 </div>
                 <div class="col-md"></div>
